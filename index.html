@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dunkin' Menu Guide Tool</title>
+    <style>
+        :root {
+            --dunkin-pink: #DB0A5B;
+            --dunkin-orange: #F57E20;
+            --dunkin-brown: #5A2C17;
+            --dunkin-cream: #FFF2D9;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--dunkin-cream);
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .sidebar {
+            width: 200px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-right: 20px;
+            height: fit-content;
+        }
+        .sidebar h3 {
+            color: var(--dunkin-pink);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .sidebar-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: var(--dunkin-orange);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .sidebar-btn:hover {
+            background-color: var(--dunkin-pink);
+        }
+        
+        /* Add blinking animation */
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .blinking {
+            animation: blink 1s linear infinite;
+        }
+        
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(to right, var(--dunkin-pink), var(--dunkin-orange));
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-style: italic;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+        .table-container {
+            overflow-x: auto;
+            max-width: 100%;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 0.8em;
+        }
+        th {
+            background: linear-gradient(to right, var(--dunkin-pink), var(--dunkin-orange));
+            color: white;
+            font-weight: bold;
+            padding: 8px 10px;
+            position: sticky;
+            top: 0;
+            text-align: left;
+            font-size: 1.0em;
+        }
+        td {
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+            word-wrap: break-word;
+            position: relative;
+            white-space: normal;
+            line-height: 1.2;
+        }
+        tr:nth-child(even) {
+            background-color: #FFF9F0;
+        }
+        /* Updated Column Widths */
+        th:nth-child(1), td:nth-child(1) { width: 15%; } /* Category */
+        th:nth-child(2), td:nth-child(2) { 
+            width: 15%; /* Item Name */
+            font-weight: 500;
+        } 
+        th:nth-child(3), td:nth-child(3) { width: 15%; } /* Base Item */
+        th:nth-child(4), td:nth-child(4) { 
+            width: 20%; /* Default Build */
+            font-weight: 500;
+        } 
+        th:nth-child(5), td:nth-child(5) { width: 30%; } /* Modifiers */
+        th:nth-child(6), td:nth-child(6) { width: 5%; }  /* Actions */
+        
+        /* Improved Text Wrapping */
+        .cell-content {
+            display: block;
+            width: 100%;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+        .line-item {
+            display: block;
+            margin-bottom: 1px;
+            white-space: normal;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.2;
+        }
+        
+        input, textarea {
+            padding: 10px;
+            margin: 8px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--dunkin-orange);
+            outline: none;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .primary-btn {
+            background-color: var(--dunkin-pink);
+            color: white;
+        }
+        .primary-btn:hover {
+            background-color: #C00950;
+        }
+        .secondary-btn {
+            background-color: var(--dunkin-orange);
+            color: white;
+        }
+        .secondary-btn:hover {
+            background-color: #E06D10;
+        }
+        .delete-btn {
+            background-color: #d9534f;
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #c9302c;
+        }
+        .edit-btn {
+            background-color: #5bc0de;
+            color: white;
+        }
+        .edit-btn:hover {
+            background-color: #46b8da;
+        }
+        .save-btn {
+            background-color: #5cb85c;
+            color: white;
+        }
+        .save-btn:hover {
+            background-color: #4cae4c;
+        }
+        .cancel-btn {
+            background-color: #f0ad4e;
+            color: white;
+        }
+        .cancel-btn:hover {
+            background-color: #eea236;
+        }
+        .lock-btn {
+            background-color: var(--dunkin-brown);
+            color: white;
+        }
+        .lock-btn:hover {
+            background-color: #4a2412;
+        }
+        .clear-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        .clear-btn:hover {
+            background-color: #5a6268;
+        }
+        .copy-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 1px 4px;
+            font-size: 0.65em;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
+        }
+        td:hover .copy-btn {
+            opacity: 1;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .search-box input {
+            flex-grow: 1;
+        }
+        .password-section {
+            background-color: #F8E8E8;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px dashed var(--dunkin-pink);
+        }
+        .hidden {
+            display: none;
+        }
+        .donut-icon {
+            font-size: 1.2em;
+            margin: 0 5px;
+        }
+        #authStatus {
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--dunkin-brown);
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .action-buttons button {
+            margin: 0;
+            padding: 8px 10px;
+            font-size: 0.9em;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        /* FAQ Section Styles */
+        .faq-container {
+            margin-top: 20px;
+        }
+        .faq-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        .faq-question {
+            font-weight: bold;
+            color: var(--dunkin-pink);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-question::after {
+            content: '+';
+            font-size: 1.2em;
+        }
+        .faq-question.active::after {
+            content: '-';
+        }
+        .faq-answer {
+            margin-top: 10px;
+            padding-left: 15px;
+            display: none;
+        }
+        .faq-answer.show {
+            display: block;
+        }
+        .faq-form {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .auth-required {
+            color: #999;
+            font-style: italic;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            .search-box {
+                flex-direction: column;
+            }
+            .search-box button {
+                width: 100%;
+            }
+            .copy-btn {
+                opacity: 1;
+            }
+            #productTable {
+                font-size: 0.7em;
+            }
+            th:nth-child(n), 
+            td:nth-child(n) { 
+                width: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h3>Quick Links</h3>
+        <button class="sidebar-btn" onclick="scrollToSection('donutsDmaSection')">Donuts DMA</button>
+        <button class="sidebar-btn" onclick="scrollToSection('munchkinsDmaSection')">Munchkins DMA</button>
+        <button class="sidebar-btn" onclick="scrollToSection('kbArticlesSection')">Related KB Articles</button>
+        <button class="sidebar-btn" onclick="scrollToSection('changeLogsSection')">Change Logs</button>
+        <button class="sidebar-btn blinking" onclick="scrollToSection('faqSection')">FAQs</button>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Dunkin' Menu Guide <span class="donut-icon">🍩</span></h1>
+            <p>Digital Product Support</p>
+        </div>
+        
+        <div class="password-section">
+            <h3>Admin Access</h3>
+            <div class="form-group">
+                <label for="adminPassword">Password:</label>
+                <input type="password" id="adminPassword" placeholder="Enter admin password">
+            </div>
+            <div class="form-actions">
+                <button class="primary-btn" onclick="authenticate()">Unlock Editing</button>
+                <button class="lock-btn" id="lockButton" onclick="lockEditing()" style="display:none;">Lock Editing</button>
+                <button class="secondary-btn" id="importButton" onclick="showImportDialog()" style="display:none;">Import Data</button>
+                <button class="secondary-btn" id="exportButton" onclick="exportData()" style="display:none;">Export Data</button>
+                <button class="secondary-btn" id="exportHtmlButton" onclick="exportHtmlFile()" style="display:none;">Export HTML File</button>
+                <button class="clear-btn" id="clearButton" onclick="clearLocalData()" style="display:none;">Clear All Data</button>
+                <span id="authStatus"></span>
+            </div>
+        </div>
+        
+        <div class="section hidden" id="importSection">
+            <h2>Import Menu Data</h2>
+            <div class="form-group">
+                <label>Paste your CSV data (with header row):</label>
+                <textarea id="importData" rows="10" placeholder="Paste CSV data here...&#10;Format should match: Category,Item Name,Base Item,Default Build,Modifiers"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Or upload a CSV or Excel file:</label>
+                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+            </div>
+            <div class="form-actions">
+                <button class="primary-btn" onclick="importData()">Import Data</button>
+                <button class="cancel-btn" onclick="hideImportDialog()">Cancel</button>
+            </div>
+            <div id="importStatus"></div>
+        </div>
+        
+        <div class="section" id="addItemSection" style="display:none;">
+            <h2 id="formTitle">Add New Menu Item</h2>
+            <input type="hidden" id="editItemId" value="">
+            <div class="form-group">
+                <label>Category:</label>
+                <input type="text" id="category" placeholder="e.g., Hot Coffee, Donuts, Breakfast Sandwiches">
+            </div>
+            <div class="form-group">
+                <label>Item Name:</label>
+                <input type="text" id="baseItem" placeholder="e.g., Iced Caramel Latte, Glazed Donut">
+            </div>
+            <div class="form-group">
+                <label>Base Item (one per line):</label>
+                <textarea id="baseItemComponents" placeholder="Enter each base component on a new line&#10;e.g.,&#10;Medium cup&#10;Hot coffee base&#10;Standard lid"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Default Build (one per line):</label>
+                <textarea id="defaultBuild" placeholder="Enter each build instruction on a new line&#10;e.g.,&#10;2 cream&#10;2 sugar&#10;Extra hot"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Modifiers (one per line):</label>
+                <textarea id="modifiers" placeholder="Enter each modifier on a new line&#10;e.g.,&#10;Extra shot&#10;No sprinkles&#10;Add whipped cream"></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="primary-btn" id="submitButton" onclick="addProduct()">Add Menu Item</button>
+                <button class="cancel-btn" id="cancelEditButton" onclick="cancelEdit()">Cancel</button>
+            </div>
+            <p id="confirmation" class="hidden">Item saved successfully!</p>
+        </div>
+        
+        <div class="section">
+            <h2>Menu Items</h2>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search drinks, food items...">
+                <button class="secondary-btn" onclick="searchProducts()">Search</button>
+                <button class="secondary-btn" onclick="resetSearch()">Show All</button>
+                <button class="primary-btn" id="addNewButton" onclick="showAddForm()" style="display:none;">Add New Item</button>
+            </div>
+            <div class="table-container">
+                <table id="productTable">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Item Name</th>
+                            <th>Base Item</th>
+                            <th>Default Build</th>
+                            <th>Modifiers</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Table will be empty by default -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Donuts DMA Section -->
+        <div class="section">
+            <h2>Donuts DMA <button class="secondary-btn" id="toggleDonutsDmaBtn" onclick="toggleSection('donutsDmaSection')">Show Donuts DMA</button></h2>
+            <div id="donutsDmaSection" style="display:none;">
+                <div class="table-container">
+                    <table id="donutsDmaTable">
+                        <thead>
+                            <tr>
+                                <th>Object ID</th>
+                                <th>Variety</th>
+                                <th>Class</th>
+                                <th>DMA</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="donutsDmaTableBody">
+                            <!-- Table will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="faq-form" id="donutsDmaForm" style="display:none;">
+                    <h3 id="donutsDmaFormTitle">Add New Donut DMA</h3>
+                    <input type="hidden" id="editDonutsDmaId" value="">
+                    <div class="form-group">
+                        <label for="donutsObjectId">Object ID:</label>
+                        <input type="text" id="donutsObjectId" placeholder="Enter object ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="donutsVariety">Variety:</label>
+                        <input type="text" id="donutsVariety" placeholder="Enter variety">
+                    </div>
+                    <div class="form-group">
+                        <label for="donutsClass">Class:</label>
+                        <input type="text" id="donutsClass" placeholder="Enter class">
+                    </div>
+                    <div class="form-group">
+                        <label for="donutsDma">DMA:</label>
+                        <input type="text" id="donutsDma" placeholder="Enter DMA">
+                    </div>
+                    <div class="form-actions">
+                        <button class="primary-btn" onclick="saveDonutsDma()">Save</button>
+                        <button class="cancel-btn" onclick="cancelDonutsDma()">Cancel</button>
+                    </div>
+                </div>
+                
+                <div id="donutsDmaAuthMessage" class="auth-required" style="display:none;">
+                    Admin access required to manage Donuts DMA
+                </div>
+                
+                <button class="primary-btn" id="addDonutsDmaBtn" onclick="showDonutsDmaForm()" style="display:none;">Add New Donut DMA</button>
+            </div>
+        </div>
+
+        <!-- Munchkins DMA Section -->
+        <div class="section">
+            <h2>Munchkins DMA <button class="secondary-btn" id="toggleMunchkinsDmaBtn" onclick="toggleSection('munchkinsDmaSection')">Show Munchkins DMA</button></h2>
+            <div id="munchkinsDmaSection" style="display:none;">
+                <div class="table-container">
+                    <table id="munchkinsDmaTable">
+                        <thead>
+                            <tr>
+                                <th>Object ID</th>
+                                <th>Variety</th>
+                                <th>DMA</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="munchkinsDmaTableBody">
+                            <!-- Table will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="faq-form" id="munchkinsDmaForm" style="display:none;">
+                    <h3 id="munchkinsDmaFormTitle">Add New Munchkin DMA</h3>
+                    <input type="hidden" id="editMunchkinsDmaId" value="">
+                    <div class="form-group">
+                        <label for="munchkinsObjectId">Object ID:</label>
+                        <input type="text" id="munchkinsObjectId" placeholder="Enter object ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="munchkinsVariety">Variety:</label>
+                        <input type="text" id="munchkinsVariety" placeholder="Enter variety">
+                    </div>
+                    <div class="form-group">
+                        <label for="munchkinsDma">DMA:</label>
+                        <input type="text" id="munchkinsDma" placeholder="Enter DMA">
+                    </div>
+                    <div class="form-actions">
+                        <button class="primary-btn" onclick="saveMunchkinsDma()">Save</button>
+                        <button class="cancel-btn" onclick="cancelMunchkinsDma()">Cancel</button>
+                    </div>
+                </div>
+                
+                <div id="munchkinsDmaAuthMessage" class="auth-required" style="display:none;">
+                    Admin access required to manage Munchkins DMA
+                </div>
+                
+                <button class="primary-btn" id="addMunchkinsDmaBtn" onclick="showMunchkinsDmaForm()" style="display:none;">Add New Munchkin DMA</button>
+            </div>
+        </div>
+
+        <!-- Related KB Articles Section -->
+        <div class="section">
+            <h2>Related KB Articles <button class="secondary-btn" id="toggleKbArticlesBtn" onclick="toggleSection('kbArticlesSection')">Show KB Articles</button></h2>
+            <div id="kbArticlesSection" style="display:none;">
+                <div class="table-container">
+                    <table id="kbArticlesTable">
+                        <thead>
+                            <tr>
+                                <th>Article</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kbArticlesTableBody">
+                            <!-- Table will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="faq-form" id="kbArticlesForm" style="display:none;">
+                    <h3 id="kbArticlesFormTitle">Add New KB Article</h3>
+                    <input type="hidden" id="editKbArticleId" value="">
+                    <div class="form-group">
+                        <label for="kbArticle">Article:</label>
+                        <input type="text" id="kbArticle" placeholder="Enter KB article">
+                    </div>
+                    <div class="form-actions">
+                        <button class="primary-btn" onclick="saveKbArticle()">Save</button>
+                        <button class="cancel-btn" onclick="cancelKbArticle()">Cancel</button>
+                    </div>
+                </div>
+                
+                <div id="kbArticlesAuthMessage" class="auth-required" style="display:none;">
+                    Admin access required to manage KB Articles
+                </div>
+                
+                <button class="primary-btn" id="addKbArticleBtn" onclick="showKbArticleForm()" style="display:none;">Add New KB Article</button>
+            </div>
+        </div>
+
+        <!-- Change Logs Section -->
+        <div class="section">
+            <h2>Change Logs <button class="secondary-btn" id="toggleChangeLogsBtn" onclick="toggleSection('changeLogsSection')">Show Change Logs</button></h2>
+            <div id="changeLogsSection" style="display:none;">
+                <div class="table-container">
+                    <table id="changeLogsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Remarks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="changeLogsTableBody">
+                            <!-- Table will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="faq-form" id="changeLogsForm" style="display:none;">
+                    <h3 id="changeLogsFormTitle">Add New Change Log</h3>
+                    <input type="hidden" id="editChangeLogId" value="">
+                    <div class="form-group">
+                        <label for="changeLogDate">Date:</label>
+                        <input type="date" id="changeLogDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="changeLogName">Name:</label>
+                        <input type="text" id="changeLogName" placeholder="Enter name">
+                    </div>
+                    <div class="form-group">
+                        <label for="changeLogRemarks">Remarks:</label>
+                        <textarea id="changeLogRemarks" placeholder="Enter remarks"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="primary-btn" onclick="saveChangeLog()">Save</button>
+                        <button class="cancel-btn" onclick="cancelChangeLog()">Cancel</button>
+                    </div>
+                </div>
+                
+                <div id="changeLogsAuthMessage" class="auth-required" style="display:none;">
+                    Admin access required to manage Change Logs
+                </div>
+                
+                <button class="primary-btn" id="addChangeLogBtn" onclick="showChangeLogForm()" style="display:none;">Add New Change Log</button>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="section">
+            <h2>FAQs <button class="secondary-btn" id="toggleFaqBtn" onclick="toggleSection('faqSection')">Show FAQs</button></h2>
+            <div id="faqSection" style="display:none;">
+                <div class="faq-container" id="faqContainer">
+                    <!-- FAQ items will be loaded here -->
+                </div>
+                
+                <!-- FAQ Form (only visible to admins) -->
+                <div class="faq-form" id="faqForm" style="display:none;">
+                    <h3>Add New FAQ</h3>
+                    <div class="form-group">
+                        <label for="faqQuestion">Question:</label>
+                        <input type="text" id="faqQuestion" placeholder="Enter the question">
+                    </div>
+                    <div class="form-group">
+                        <label for="faqAnswer">Answer:</label>
+                        <textarea id="faqAnswer" placeholder="Enter the answer"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="primary-btn" onclick="addFaq()">Add FAQ</button>
+                        <button class="cancel-btn" onclick="cancelFaq()">Cancel</button>
+                    </div>
+                </div>
+                
+                <div id="faqAuthMessage" class="auth-required" style="display:none;">
+                    Admin access required to add FAQs
+                </div>
+                
+                <button class="primary-btn" id="addFaqBtn" onclick="showFaqForm()" style="display:none;">Add New FAQ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add SheetJS library for Excel support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        // Store menu items in local storage
+        let menuItems = JSON.parse(localStorage.getItem('dunkinMenuItems')) || [];
+        // Store FAQs in local storage
+        let faqs = JSON.parse(localStorage.getItem('dunkinFaqs')) || [];
+        // Store Donuts DMA in local storage
+        let donutsDma = JSON.parse(localStorage.getItem('dunkinDonutsDma')) || [];
+        // Store Munchkins DMA in local storage
+        let munchkinsDma = JSON.parse(localStorage.getItem('dunkinMunchkinsDma')) || [];
+        // Store KB Articles in local storage
+        let kbArticles = JSON.parse(localStorage.getItem('dunkinKbArticles')) || [];
+        // Store Change Logs in local storage
+        let changeLogs = JSON.parse(localStorage.getItem('dunkinChangeLogs')) || [];
+        
+        const ADMIN_PASSWORD = "dunkin123"; // CHANGE THIS TO YOUR PASSWORD
+        let isAuthenticated = false;
+        
+        // Display existing items on page load
+        window.onload = function() {
+            displayProducts(menuItems);
+            loadFaqs();
+            loadDonutsDma();
+            loadMunchkinsDma();
+            loadKbArticles();
+            loadChangeLogs();
+        };
+        
+        // Scroll to section
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                // First show the section if it's hidden
+                if (section.style.display === 'none') {
+                    const toggleBtn = document.getElementById(`toggle${sectionId.charAt(0).toUpperCase() + sectionId.slice(1).replace('Section', '')}Btn`);
+                    if (toggleBtn) toggleBtn.textContent = 'Hide ' + toggleBtn.textContent.replace('Show ', '');
+                    section.style.display = 'block';
+                }
+                section.scrollIntoView({ behavior: 'smooth' });
+                
+                // Remove blinking class from FAQs button if this is the FAQs section
+                if (sectionId === 'faqSection') {
+                    const faqButtons = document.querySelectorAll('.sidebar-btn');
+                    faqButtons.forEach(btn => {
+                        if (btn.textContent === 'FAQs') {
+                            btn.classList.remove('blinking');
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Toggle section visibility
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const toggleBtn = document.getElementById(`toggle${sectionId.charAt(0).toUpperCase() + sectionId.slice(1).replace('Section', '')}Btn`);
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                toggleBtn.textContent = 'Hide ' + toggleBtn.textContent.replace('Show ', '');
+                
+                // Show add button only if authenticated
+                if (isAuthenticated) {
+                    const addBtn = document.getElementById(`add${sectionId.charAt(0).toUpperCase() + sectionId.slice(1).replace('Section', '')}Btn`);
+                    if (addBtn) addBtn.style.display = 'inline-block';
+                    const authMsg = document.getElementById(`${sectionId}AuthMessage`);
+                    if (authMsg) authMsg.style.display = 'none';
+                } else {
+                    const authMsg = document.getElementById(`${sectionId}AuthMessage`);
+                    if (authMsg) authMsg.style.display = 'block';
+                    const addBtn = document.getElementById(`add${sectionId.charAt(0).toUpperCase() + sectionId.slice(1).replace('Section', '')}Btn`);
+                    if (addBtn) addBtn.style.display = 'none';
+                }
+            } else {
+                section.style.display = 'none';
+                toggleBtn.textContent = 'Show ' + toggleBtn.textContent.replace('Hide ', '');
+                const addBtn = document.getElementById(`add${sectionId.charAt(0).toUpperCase() + sectionId.slice(1).replace('Section', '')}Btn`);
+                if (addBtn) addBtn.style.display = 'none';
+                const authMsg = document.getElementById(`${sectionId}AuthMessage`);
+                if (authMsg) authMsg.style.display = 'none';
+                const form = document.getElementById(`${sectionId.replace('Section', 'Form')}`);
+                if (form) form.style.display = 'none';
+            }
+        }
+        
+        // Authenticate user
+        function authenticate() {
+            const enteredPassword = document.getElementById('adminPassword').value;
+            if (enteredPassword === ADMIN_PASSWORD) {
+                isAuthenticated = true;
+                document.getElementById('authStatus').textContent = "✓ Admin mode unlocked";
+                document.getElementById('authStatus').style.color = "green";
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('addNewButton').style.display = 'block';
+                document.getElementById('lockButton').style.display = 'inline-block';
+                document.getElementById('importButton').style.display = 'inline-block';
+                document.getElementById('exportButton').style.display = 'inline-block';
+                document.getElementById('exportHtmlButton').style.display = 'inline-block';
+                document.getElementById('clearButton').style.display = 'inline-block';
+                document.getElementById('addFaqBtn').style.display = 'inline-block';
+                document.getElementById('faqAuthMessage').style.display = 'none';
+                document.getElementById('addDonutsDmaBtn').style.display = 'inline-block';
+                document.getElementById('donutsDmaAuthMessage').style.display = 'none';
+                document.getElementById('addMunchkinsDmaBtn').style.display = 'inline-block';
+                document.getElementById('munchkinsDmaAuthMessage').style.display = 'none';
+                document.getElementById('addKbArticleBtn').style.display = 'inline-block';
+                document.getElementById('kbArticlesAuthMessage').style.display = 'none';
+                document.getElementById('addChangeLogBtn').style.display = 'inline-block';
+                document.getElementById('changeLogsAuthMessage').style.display = 'none';
+                displayProducts(menuItems);
+                loadFaqs();
+                loadDonutsDma();
+                loadMunchkinsDma();
+                loadKbArticles();
+                loadChangeLogs();
+            } else {
+                isAuthenticated = false;
+                document.getElementById('addItemSection').style.display = 'none';
+                document.getElementById('importSection').classList.add('hidden');
+                document.getElementById('authStatus').textContent = "✗ Incorrect admin password";
+                document.getElementById('authStatus').style.color = "red";
+                document.getElementById('addNewButton').style.display = 'none';
+                document.getElementById('lockButton').style.display = 'none';
+                document.getElementById('importButton').style.display = 'none';
+                document.getElementById('exportButton').style.display = 'none';
+                document.getElementById('exportHtmlButton').style.display = 'none';
+                document.getElementById('clearButton').style.display = 'none';
+                document.getElementById('addFaqBtn').style.display = 'none';
+                document.getElementById('faqForm').style.display = 'none';
+                document.getElementById('faqAuthMessage').style.display = 'block';
+                document.getElementById('addDonutsDmaBtn').style.display = 'none';
+                document.getElementById('donutsDmaForm').style.display = 'none';
+                document.getElementById('donutsDmaAuthMessage').style.display = 'block';
+                document.getElementById('addMunchkinsDmaBtn').style.display = 'none';
+                document.getElementById('munchkinsDmaForm').style.display = 'none';
+                document.getElementById('munchkinsDmaAuthMessage').style.display = 'block';
+                document.getElementById('addKbArticleBtn').style.display = 'none';
+                document.getElementById('kbArticlesForm').style.display = 'none';
+                document.getElementById('kbArticlesAuthMessage').style.display = 'block';
+                document.getElementById('addChangeLogBtn').style.display = 'none';
+                document.getElementById('changeLogsForm').style.display = 'none';
+                document.getElementById('changeLogsAuthMessage').style.display = 'block';
+            }
+        }
+        
+        // Lock editing mode
+        function lockEditing() {
+            isAuthenticated = false;
+            document.getElementById('addItemSection').style.display = 'none';
+            document.getElementById('importSection').classList.add('hidden');
+            document.getElementById('authStatus').textContent = "Admin mode locked";
+            document.getElementById('authStatus').style.color = "var(--dunkin-brown)";
+            document.getElementById('addNewButton').style.display = 'none';
+            document.getElementById('lockButton').style.display = 'none';
+            document.getElementById('importButton').style.display = 'none';
+            document.getElementById('exportButton').style.display = 'none';
+            document.getElementById('exportHtmlButton').style.display = 'none';
+            document.getElementById('clearButton').style.display = 'none';
+            document.getElementById('addFaqBtn').style.display = 'none';
+            document.getElementById('faqForm').style.display = 'none';
+            document.getElementById('faqAuthMessage').style.display = 'block';
+            document.getElementById('addDonutsDmaBtn').style.display = 'none';
+            document.getElementById('donutsDmaForm').style.display = 'none';
+            document.getElementById('donutsDmaAuthMessage').style.display = 'block';
+            document.getElementById('addMunchkinsDmaBtn').style.display = 'none';
+            document.getElementById('munchkinsDmaForm').style.display = 'none';
+            document.getElementById('munchkinsDmaAuthMessage').style.display = 'block';
+            document.getElementById('addKbArticleBtn').style.display = 'none';
+            document.getElementById('kbArticlesForm').style.display = 'none';
+            document.getElementById('kbArticlesAuthMessage').style.display = 'block';
+            document.getElementById('addChangeLogBtn').style.display = 'none';
+            document.getElementById('changeLogsForm').style.display = 'none';
+            document.getElementById('changeLogsAuthMessage').style.display = 'block';
+            resetForm();
+            displayProducts(menuItems);
+            loadFaqs();
+            loadDonutsDma();
+            loadMunchkinsDma();
+            loadKbArticles();
+            loadChangeLogs();
+        }
+        
+        // Clear all local data
+        function clearLocalData() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            if (confirm("Are you sure you want to clear ALL data (Menu Items, FAQs, DMAs, KB Articles, Change Logs)? This cannot be undone!")) {
+                menuItems = [];
+                faqs = [];
+                donutsDma = [];
+                munchkinsDma = [];
+                kbArticles = [];
+                changeLogs = [];
+                localStorage.removeItem('dunkinMenuItems');
+                localStorage.removeItem('dunkinFaqs');
+                localStorage.removeItem('dunkinDonutsDma');
+                localStorage.removeItem('dunkinMunchkinsDma');
+                localStorage.removeItem('dunkinKbArticles');
+                localStorage.removeItem('dunkinChangeLogs');
+                displayProducts(menuItems);
+                loadFaqs();
+                loadDonutsDma();
+                loadMunchkinsDma();
+                loadKbArticles();
+                loadChangeLogs();
+                alert("All data has been cleared.");
+            }
+        }
+        
+        // Export data as standalone HTML file with all functionality
+        function exportHtmlFile() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+
+            // Create a clone of the current data
+            const exportData = {
+                menuItems: JSON.parse(JSON.stringify(menuItems)),
+                faqs: JSON.parse(JSON.stringify(faqs)),
+                donutsDma: JSON.parse(JSON.stringify(donutsDma)),
+                munchkinsDma: JSON.parse(JSON.stringify(munchkinsDma)),
+                kbArticles: JSON.parse(JSON.stringify(kbArticles)),
+                changeLogs: JSON.parse(JSON.stringify(changeLogs))
+            };
+
+            // Create a DOMParser to work with the current document
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(document.documentElement.outerHTML, 'text/html');
+
+            // Update the initial data in the script
+            const scripts = doc.querySelectorAll('script');
+            const mainScript = scripts[scripts.length - 1]; // Get the main script block
+            let scriptContent = mainScript.innerHTML;
+
+            // Replace the initial data declarations
+            scriptContent = scriptContent.replace(
+                /let menuItems = [^;]*;/,
+                `let menuItems = ${JSON.stringify(exportData.menuItems)};`
+            ).replace(
+                /let faqs = [^;]*;/,
+                `let faqs = ${JSON.stringify(exportData.faqs)};`
+            ).replace(
+                /let donutsDma = [^;]*;/,
+                `let donutsDma = ${JSON.stringify(exportData.donutsDma)};`
+            ).replace(
+                /let munchkinsDma = [^;]*;/,
+                `let munchkinsDma = ${JSON.stringify(exportData.munchkinsDma)};`
+            ).replace(
+                /let kbArticles = [^;]*;/,
+                `let kbArticles = ${JSON.stringify(exportData.kbArticles)};`
+            ).replace(
+                /let changeLogs = [^;]*;/,
+                `let changeLogs = ${JSON.stringify(exportData.changeLogs)};`
+            );
+
+            // Update the script content
+            mainScript.innerHTML = scriptContent;
+
+            // Create the HTML string
+            const htmlString = `<!DOCTYPE html>\n${doc.documentElement.outerHTML}`;
+
+            // Create download link
+            const blob = new Blob([htmlString], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `dunkin_menu_export_${new Date().toISOString().split('T')[0]}.html`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Show the add form
+        function showAddForm() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            resetForm();
+            document.getElementById('addItemSection').style.display = 'block';
+            document.getElementById('addItemSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Show the import dialog
+        function showImportDialog() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            document.getElementById('importSection').classList.remove('hidden');
+            document.getElementById('importSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Hide the import dialog
+        function hideImportDialog() {
+            document.getElementById('importSection').classList.add('hidden');
+            document.getElementById('importStatus').textContent = '';
+        }
+
+        // Export data as CSV
+        function exportData() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            if (menuItems.length === 0 && faqs.length === 0 && donutsDma.length === 0 && 
+                munchkinsDma.length === 0 && kbArticles.length === 0 && changeLogs.length === 0) {
+                alert("No data to export!");
+                return;
+            }
+            
+            // Create CSV content for each section
+            let csv = '';
+            
+            // Menu Items
+            if (menuItems.length > 0) {
+                csv += 'Menu Items\n';
+                csv += 'Category,Item Name,Base Item,Default Build,Modifiers\n';
+                menuItems.forEach(item => {
+                    csv += `"${escapeCsv(item.category)}","${escapeCsv(item.baseItem)}","${escapeCsv(item.baseItemComponents || '')}","${escapeCsv(item.defaultBuild || '')}","${escapeCsv(item.modifiers || '')}"\n`;
+                });
+                csv += '\n';
+            }
+            
+            // Donuts DMA
+            if (donutsDma.length > 0) {
+                csv += 'Donuts DMA\n';
+                csv += 'Object ID,Variety,Class,DMA\n';
+                donutsDma.forEach(item => {
+                    csv += `"${escapeCsv(item.objectId)}","${escapeCsv(item.variety)}","${escapeCsv(item.class)}","${escapeCsv(item.dma)}"\n`;
+                });
+                csv += '\n';
+            }
+            
+            // Munchkins DMA
+            if (munchkinsDma.length > 0) {
+                csv += 'Munchkins DMA\n';
+                csv += 'Object ID,Variety,DMA\n';
+                munchkinsDma.forEach(item => {
+                    csv += `"${escapeCsv(item.objectId)}","${escapeCsv(item.variety)}","${escapeCsv(item.dma)}"\n`;
+                });
+                csv += '\n';
+            }
+            
+            // KB Articles
+            if (kbArticles.length > 0) {
+                csv += 'KB Articles\n';
+                csv += 'Article\n';
+                kbArticles.forEach(item => {
+                    csv += `"${escapeCsv(item.article)}"\n`;
+                });
+                csv += '\n';
+            }
+            
+            // Change Logs
+            if (changeLogs.length > 0) {
+                csv += 'Change Logs\n';
+                csv += 'Date,Name,Remarks\n';
+                changeLogs.forEach(item => {
+                    csv += `"${escapeCsv(item.date)}","${escapeCsv(item.name)}","${escapeCsv(item.remarks)}"\n`;
+                });
+                csv += '\n';
+            }
+            
+            // FAQs
+            if (faqs.length > 0) {
+                csv += 'FAQs\n';
+                csv += 'Question,Answer\n';
+                faqs.forEach(faq => {
+                    csv += `"${escapeCsv(faq.question)}","${escapeCsv(faq.answer)}"\n`;
+                });
+            }
+            
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'dunkin_menu_data.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Helper function to escape CSV values
+        function escapeCsv(text) {
+            if (!text) return '';
+            return text.replace(/"/g, '""').replace(/\n/g, '\\n');
+        }
+
+        // Import data from CSV or Excel
+        function importData() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const importText = document.getElementById('importData').value;
+            const fileInput = document.getElementById('fileInput');
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const data = e.target.result;
+                    
+                    // Check if it's an Excel file
+                    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        processExcelData(data);
+                    } else {
+                        // Process as CSV
+                        processImportData(data);
+                    }
+                };
+                
+                reader.readAsBinaryString(file);
+            } else if (importText) {
+                // Import from textarea (CSV)
+                processImportData(importText);
+            } else {
+                alert("Please provide either CSV/Excel data or select a file to import.");
+            }
+        }
+
+        // Process Excel data (XLSX or XLS)
+        function processExcelData(data) {
+            const statusElement = document.getElementById('importStatus');
+            statusElement.textContent = "Processing Excel file...";
+            statusElement.style.color = "black";
+            
+            try {
+                // Parse Excel workbook
+                const workbook = XLSX.read(data, { type: 'binary' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                
+                // Convert to JSON (array of arrays)
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                if (jsonData.length < 2) {
+                    throw new Error("Excel file must have at least a header row and one data row");
+                }
+                
+                // Get headers
+                const headers = jsonData[0].map(h => h.trim());
+                const expectedHeaders = ['Category', 'Item Name', 'Base Item', 'Default Build', 'Modifiers'];
+                
+                if (!arraysEqual(headers, expectedHeaders)) {
+                    throw new Error(`Excel headers must be exactly: ${expectedHeaders.join(', ')}`);
+                }
+                
+                // Convert to CSV format for processing
+                let csvData = jsonData.map(row => row.join(',')).join('\n');
+                processImportData(csvData);
+                
+            } catch (error) {
+                statusElement.textContent = `Error: ${error.message}`;
+                statusElement.style.color = "red";
+                console.error("Excel import error:", error);
+            }
+        }
+
+        // Process imported CSV data
+        function importData() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const importText = document.getElementById('importData').value;
+            const fileInput = document.getElementById('fileInput');
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const data = e.target.result;
+                    
+                    // Check if it's an Excel file
+                    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        processExcelData(data);
+                    } else {
+                        // Process as CSV
+                        processImportData(data);
+                    }
+                };
+                
+                reader.readAsBinaryString(file);
+            } else if (importText) {
+                // Import from textarea (CSV)
+                processImportData(importText);
+            } else {
+                alert("Please provide either CSV/Excel data or select a file to import.");
+            }
+        }
+
+        // Process Excel data (XLSX or XLS)
+        function processExcelData(data) {
+            const statusElement = document.getElementById('importStatus');
+            statusElement.textContent = "Processing Excel file...";
+            statusElement.style.color = "black";
+            
+            try {
+                // Parse Excel workbook
+                const workbook = XLSX.read(data, { type: 'binary' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                
+                // Convert to JSON (array of arrays)
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                if (jsonData.length < 2) {
+                    throw new Error("Excel file must have at least a header row and one data row");
+                }
+                
+                // Convert to CSV format for processing
+                let csvData = jsonData.map(row => row.join(',')).join('\n');
+                processImportData(csvData);
+                
+            } catch (error) {
+                statusElement.textContent = `Error: ${error.message}`;
+                statusElement.style.color = "red";
+                console.error("Excel import error:", error);
+            }
+        }
+
+        // Process imported CSV data
+        function processImportData(csvData) {
+            const statusElement = document.getElementById('importStatus');
+            statusElement.textContent = "Processing import...";
+            statusElement.style.color = "black";
+            
+            try {
+                // Split into sections
+                const sections = csvData.split('\n\n').filter(section => section.trim() !== '');
+                
+                // Process each section
+                sections.forEach(section => {
+                    const lines = section.split('\n').filter(line => line.trim() !== '');
+                    if (lines.length < 2) return; // Skip sections without data
+                    
+                    const sectionName = lines[0].trim();
+                    const sectionData = lines.slice(1);
+                    
+                    switch(sectionName) {
+                        case 'Menu Items':
+                            processMenuItems(sectionData);
+                            break;
+                        case 'Donuts DMA':
+                            processDonutsDma(sectionData);
+                            break;
+                        case 'Munchkins DMA':
+                            processMunchkinsDma(sectionData);
+                            break;
+                        case 'KB Articles':
+                            processKbArticles(sectionData);
+                            break;
+                        case 'Change Logs':
+                            processChangeLogs(sectionData);
+                            break;
+                        case 'FAQs':
+                            processFaqs(sectionData);
+                            break;
+                    }
+                });
+                
+                statusElement.textContent = "Import completed successfully!";
+                statusElement.style.color = "green";
+                
+                // Refresh all displays
+                displayProducts(menuItems);
+                loadDonutsDma();
+                loadMunchkinsDma();
+                loadKbArticles();
+                loadChangeLogs();
+                loadFaqs();
+                
+                // Hide import dialog after successful import
+                setTimeout(() => {
+                    hideImportDialog();
+                }, 2000);
+                
+            } catch (error) {
+                statusElement.textContent = `Error: ${error.message}`;
+                statusElement.style.color = "red";
+                console.error("Import error:", error);
+            }
+        }
+
+        // Process Menu Items section
+        function processMenuItems(data) {
+            const headers = data[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const expectedHeaders = ['Category', 'Item Name', 'Base Item', 'Default Build', 'Modifiers'];
+            
+            if (!arraysEqual(headers, expectedHeaders)) {
+                throw new Error(`Menu Items headers must be exactly: ${expectedHeaders.join(', ')}`);
+            }
+            
+            const newItems = [];
+            let skippedRows = 0;
+            
+            for (let i = 1; i < data.length; i++) {
+                const line = data[i];
+                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                
+                if (values.length < expectedHeaders.length) {
+                    skippedRows++;
+                    continue;
+                }
+                
+                const cleanValues = values.map(v => 
+                    v.replace(/^"/, '').replace(/"$/, '').replace(/\\n/g, '\n').trim()
+                );
+                
+                newItems.push({
+                    id: Date.now() + i,
+                    category: cleanValues[0],
+                    baseItem: cleanValues[1],
+                    baseItemComponents: cleanValues[2] || null,
+                    defaultBuild: cleanValues[3] || null,
+                    modifiers: cleanValues[4] || null
+                });
+            }
+            
+            if (confirm(`Import ${newItems.length} menu items (${skippedRows} rows skipped)?`)) {
+                menuItems = newItems;
+                localStorage.setItem('dunkinMenuItems', JSON.stringify(menuItems));
+            }
+        }
+
+        // Process Donuts DMA section
+        function processDonutsDma(data) {
+            const headers = data[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const expectedHeaders = ['Object ID', 'Variety', 'Class', 'DMA'];
+            
+            if (!arraysEqual(headers, expectedHeaders)) {
+                throw new Error(`Donuts DMA headers must be exactly: ${expectedHeaders.join(', ')}`);
+            }
+            
+            const newItems = [];
+            let skippedRows = 0;
+            
+            for (let i = 1; i < data.length; i++) {
+                const line = data[i];
+                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                
+                if (values.length < expectedHeaders.length) {
+                    skippedRows++;
+                    continue;
+                }
+                
+                const cleanValues = values.map(v => 
+                    v.replace(/^"/, '').replace(/"$/, '').replace(/\\n/g, '\n').trim()
+                );
+                
+                newItems.push({
+                    id: Date.now().toString() + i,
+                    objectId: cleanValues[0],
+                    variety: cleanValues[1],
+                    class: cleanValues[2],
+                    dma: cleanValues[3]
+                });
+            }
+            
+            if (confirm(`Import ${newItems.length} Donuts DMA entries (${skippedRows} rows skipped)?`)) {
+                donutsDma = newItems;
+                localStorage.setItem('dunkinDonutsDma', JSON.stringify(donutsDma));
+            }
+        }
+
+        // Process Munchkins DMA section
+        function processMunchkinsDma(data) {
+            const headers = data[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const expectedHeaders = ['Object ID', 'Variety', 'DMA'];
+            
+            if (!arraysEqual(headers, expectedHeaders)) {
+                throw new Error(`Munchkins DMA headers must be exactly: ${expectedHeaders.join(', ')}`);
+            }
+            
+            const newItems = [];
+            let skippedRows = 0;
+            
+            for (let i = 1; i < data.length; i++) {
+                const line = data[i];
+                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                
+                if (values.length < expectedHeaders.length) {
+                    skippedRows++;
+                    continue;
+                }
+                
+                const cleanValues = values.map(v => 
+                    v.replace(/^"/, '').replace(/"$/, '').replace(/\\n/g, '\n').trim()
+                );
+                
+                newItems.push({
+                    id: Date.now().toString() + i,
+                    objectId: cleanValues[0],
+                    variety: cleanValues[1],
+                    dma: cleanValues[2]
+                });
+            }
+            
+            if (confirm(`Import ${newItems.length} Munchkins DMA entries (${skippedRows} rows skipped)?`)) {
+                munchkinsDma = newItems;
+                localStorage.setItem('dunkinMunchkinsDma', JSON.stringify(munchkinsDma));
+            }
+        }
+
+        // Process KB Articles section
+        function processKbArticles(data) {
+            const headers = data[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const expectedHeaders = ['Article'];
+            
+            if (!arraysEqual(headers, expectedHeaders)) {
+                throw new Error(`KB Articles headers must be exactly: ${expectedHeaders.join(', ')}`);
+            }
+            
+            const newItems = [];
+            let skippedRows = 0;
+            
+            for (let i = 1; i < data.length; i++) {
+                const line = data[i];
+                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                
+                if (values.length < expectedHeaders.length) {
+                    skippedRows++;
+                    continue;
+                }
+                
+                const cleanValues = values.map(v => 
+                    v.replace(/^"/, '').replace(/"$/, '').replace(/\\n/g, '\n').trim()
+                );
+                
+                newItems.push({
+                    id: Date.now().toString() + i,
+                    article: cleanValues[0]
+                });
+            }
+            
+            if (confirm(`Import ${newItems.length} KB Articles (${skippedRows} rows skipped)?`)) {
+                kbArticles = newItems;
+                localStorage.setItem('dunkinKbArticles', JSON.stringify(kbArticles));
+            }
+        }
+
+        // Process Change Logs section
+        function processChangeLogs(data) {
+            const headers = data[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const expectedHeaders = ['Date', 'Name', 'Remarks'];
+            
+            if (!arraysEqual(headers, expectedHeaders)) {
+                throw new Error(`Change Logs headers must be exactly: ${expectedHeaders.join(', ')}`);
+            }
+            
+            const newItems = [];
+            let skippedRows = 0;
+            
+            for (let i = 1; i < data.length; i++) {
+                const line = data[i];
+                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                
+                if (values.length < expectedHeaders.length) {
+                    skippedRows++;
+                    continue;
+                }
+                
+                const cleanValues = values.map(v => 
+                    v.replace(/^"/, '').replace(/"$/, '').replace(/\\n/g, '\n').trim()
+                );
+                
+                newItems.push({
+                    id: Date.now().toString() + i,
+                    date: cleanValues[0],
+                    name: cleanValues[1],
+                    remarks: cleanValues[2]
+                });
+            }
+            
+            if (confirm(`Import ${newItems.length} Change Logs (${skippedRows} rows skipped)?`)) {
+                changeLogs = newItems;
+                localStorage.setItem('dunkinChangeLogs', JSON.stringify(changeLogs));
+            }
+        }
+
+        // Process FAQs section
+        function processFaqs(data) {
+            const headers = data[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const expectedHeaders = ['Question', 'Answer'];
+            
+            if (!arraysEqual(headers, expectedHeaders)) {
+                throw new Error(`FAQs headers must be exactly: ${expectedHeaders.join(', ')}`);
+            }
+            
+            const newItems = [];
+            let skippedRows = 0;
+            
+            for (let i = 1; i < data.length; i++) {
+                const line = data[i];
+                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+                
+                if (values.length < expectedHeaders.length) {
+                    skippedRows++;
+                    continue;
+                }
+                
+                const cleanValues = values.map(v => 
+                    v.replace(/^"/, '').replace(/"$/, '').replace(/\\n/g, '\n').trim()
+                );
+                
+                newItems.push({
+                    question: cleanValues[0],
+                    answer: cleanValues[1]
+                });
+            }
+            
+            if (confirm(`Import ${newItems.length} FAQs (${skippedRows} rows skipped)?`)) {
+                faqs = newItems;
+                localStorage.setItem('dunkinFaqs', JSON.stringify(faqs));
+            }
+        }
+
+        // Helper function to compare arrays
+        function arraysEqual(a, b) {
+            if (a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i++) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
+        }
+        
+        // Add a new menu item or update existing one
+        function addProduct() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const category = document.getElementById('category').value;
+            const baseItem = document.getElementById('baseItem').value;
+            const baseItemComponentsText = document.getElementById('baseItemComponents').value;
+            const defaultBuildText = document.getElementById('defaultBuild').value;
+            const modifiersText = document.getElementById('modifiers').value;
+            const editItemId = document.getElementById('editItemId').value;
+            
+            // Convert textarea inputs into arrays (split by newlines)
+            const baseItemComponentsArray = baseItemComponentsText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+                
+            const defaultBuildArray = defaultBuildText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+                
+            const modifiersArray = modifiersText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+            
+            // Convert arrays back to strings with line breaks for display
+            const baseItemComponents = baseItemComponentsArray.join('\n');
+            const defaultBuild = defaultBuildArray.join('\n');
+            const modifiers = modifiersArray.join('\n');
+            
+            if (category && baseItem && defaultBuild) {
+                if (editItemId) {
+                    // Update existing item
+                    const index = menuItems.findIndex(item => item.id == editItemId);
+                    if (index !== -1) {
+                        menuItems[index] = {
+                            id: parseInt(editItemId),
+                            category,
+                            baseItem,
+                            baseItemComponents: baseItemComponents || null,
+                            defaultBuild: defaultBuild || null,
+                            modifiers: modifiers || null
+                        };
+                    }
+                } else {
+                    // Add new item
+                    const newItem = {
+                        id: Date.now(),
+                        category,
+                        baseItem,
+                        baseItemComponents: baseItemComponents || null,
+                        defaultBuild: defaultBuild || null,
+                        modifiers: modifiers || null
+                    };
+                    menuItems.push(newItem);
+                }
+                
+                localStorage.setItem('dunkinMenuItems', JSON.stringify(menuItems));
+                
+                // Clear form and reset to add mode
+                resetForm();
+                document.getElementById('addItemSection').style.display = 'none';
+                
+                // Show confirmation
+                const confirmation = document.getElementById('confirmation');
+                confirmation.classList.remove('hidden');
+                setTimeout(() => confirmation.classList.add('hidden'), 2000);
+                
+                displayProducts(menuItems);
+                
+                // Scroll back to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                alert('Please fill in at least Category, Item Name and Default Build');
+            }
+        }
+        
+        // Reset the form to add new item mode
+        function resetForm() {
+            document.getElementById('category').value = '';
+            document.getElementById('baseItem').value = '';
+            document.getElementById('baseItemComponents').value = '';
+            document.getElementById('defaultBuild').value = '';
+            document.getElementById('modifiers').value = '';
+            document.getElementById('editItemId').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Menu Item';
+            document.getElementById('submitButton').textContent = 'Add Menu Item';
+        }
+        
+        // Cancel edit and return to add mode
+        function cancelEdit() {
+            resetForm();
+            document.getElementById('addItemSection').style.display = 'none';
+        }
+        
+        // Edit an existing menu item
+        function editProduct(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const item = menuItems.find(item => item.id == id);
+            if (item) {
+                document.getElementById('category').value = item.category;
+                document.getElementById('baseItem').value = item.baseItem;
+                document.getElementById('baseItemComponents').value = item.baseItemComponents || '';
+                document.getElementById('defaultBuild').value = item.defaultBuild || '';
+                document.getElementById('modifiers').value = item.modifiers || '';
+                document.getElementById('editItemId').value = item.id;
+                document.getElementById('formTitle').textContent = 'Edit Menu Item';
+                document.getElementById('submitButton').textContent = 'Save Changes';
+                document.getElementById('addItemSection').style.display = 'block';
+                
+                // Scroll to form
+                document.getElementById('addItemSection').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Improved copy function
+        function copyToClipboard(text) {
+            if (!text || text === '-') return;
+            
+            // Create a temporary textarea element
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';  // Prevent scrolling to bottom
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? 'Copied!' : 'Failed';
+                
+                // Show feedback on the button that was clicked
+                if (event.target.classList.contains('copy-btn')) {
+                    const originalText = event.target.textContent;
+                    event.target.textContent = msg;
+                    event.target.style.backgroundColor = successful ? '#28a745' : '#dc3545';
+                    setTimeout(() => {
+                        event.target.textContent = originalText;
+                        event.target.style.backgroundColor = '#6c757d';
+                    }, 1000);
+                }
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+            
+            document.body.removeChild(textarea);
+        }
+        
+        // Display menu items in table
+        function displayProducts(itemsToDisplay) {
+            const tableBody = document.getElementById('productTableBody');
+            tableBody.innerHTML = '';
+            
+            if (itemsToDisplay.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6">No menu items found</td></tr>';
+                return;
+            }
+            
+            itemsToDisplay.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Format content with line breaks and proper wrapping
+                const formatContent = (text) => {
+                    if (!text || text.trim() === '') return '<div class="cell-content">-</div>';
+                    
+                    // Escape single quotes and properly format newlines
+                    const escapedText = text.replace(/'/g, "\\'").replace(/\n/g, '\\n');
+                    const lines = text.split('\n');
+                    const formattedLines = lines.map(line => 
+                        `<span class="line-item">${line}</span>`).join('');
+                    
+                    return `
+                        <div class="cell-content" style="position:relative;">
+                            ${formattedLines}
+                            <button class="copy-btn" onclick="copyToClipboard('${escapedText}')">Copy</button>
+                        </div>
+                    `;
+                };
+                
+                // Create action buttons
+                let actionButtons = '';
+                if (isAuthenticated) {
+                    actionButtons = `
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editProduct(${item.id})">Edit</button>
+                            <button class="delete-btn" onclick="deleteProduct(${item.id})">Delete</button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = '<span style="color:#999">[authenticate to edit]</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${formatContent(item.category)}</td>
+                    <td>${formatContent(item.baseItem)}</td>
+                    <td>${formatContent(item.baseItemComponents || '')}</td>
+                    <td>${formatContent(item.defaultBuild || '')}</td>
+                    <td>${formatContent(item.modifiers || '')}</td>
+                    <td>${actionButtons}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Search menu items
+        function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayProducts(menuItems);
+                return;
+            }
+            
+            const filteredItems = menuItems.filter(item => 
+                item.category.toLowerCase().includes(searchTerm) ||
+                item.baseItem.toLowerCase().includes(searchTerm) ||
+                (item.baseItemComponents && item.baseItemComponents.toLowerCase().includes(searchTerm)) ||
+                (item.defaultBuild && item.defaultBuild.toLowerCase().includes(searchTerm)) ||
+                (item.modifiers && item.modifiers.toLowerCase().includes(searchTerm))
+            );
+            
+            displayProducts(filteredItems);
+        }
+        
+        // Reset search
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            displayProducts(menuItems);
+        }
+        
+        // Delete menu item
+        function deleteProduct(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            if (confirm('Delete this menu item permanently?')) {
+                menuItems = menuItems.filter(item => item.id !== id);
+                localStorage.setItem('dunkinMenuItems', JSON.stringify(menuItems));
+                displayProducts(menuItems);
+            }
+        }
+        
+        /* Donuts DMA Functions */
+        function loadDonutsDma() {
+            const tableBody = document.getElementById('donutsDmaTableBody');
+            tableBody.innerHTML = '';
+            
+            if (donutsDma.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5">No Donuts DMA data available</td></tr>';
+                return;
+            }
+            
+            donutsDma.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Create action buttons
+                let actionButtons = '';
+                if (isAuthenticated) {
+                    actionButtons = `
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editDonutsDma('${item.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteDonutsDma('${item.id}')">Delete</button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = '<span style="color:#999">[authenticate to edit]</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${item.objectId || '-'}</td>
+                    <td>${item.variety || '-'}</td>
+                    <td>${item.class || '-'}</td>
+                    <td>${item.dma || '-'}</td>
+                    <td>${actionButtons}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function showDonutsDmaForm() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            resetDonutsDmaForm();
+            document.getElementById('donutsDmaForm').style.display = 'block';
+            document.getElementById('donutsDmaForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function resetDonutsDmaForm() {
+            document.getElementById('donutsObjectId').value = '';
+            document.getElementById('donutsVariety').value = '';
+            document.getElementById('donutsClass').value = '';
+            document.getElementById('donutsDma').value = '';
+            document.getElementById('editDonutsDmaId').value = '';
+            document.getElementById('donutsDmaFormTitle').textContent = 'Add New Donut DMA';
+        }
+        
+        function saveDonutsDma() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const objectId = document.getElementById('donutsObjectId').value;
+            const variety = document.getElementById('donutsVariety').value;
+            const dmaClass = document.getElementById('donutsClass').value;
+            const dma = document.getElementById('donutsDma').value;
+            const editId = document.getElementById('editDonutsDmaId').value;
+            
+            if (objectId && variety && dmaClass && dma) {
+                if (editId) {
+                    // Update existing item
+                    const index = donutsDma.findIndex(item => item.id === editId);
+                    if (index !== -1) {
+                        donutsDma[index] = {
+                            id: editId,
+                            objectId,
+                            variety,
+                            class: dmaClass,
+                            dma
+                        };
+                    }
+                } else {
+                    // Add new item
+                    const newItem = {
+                        id: Date.now().toString(),
+                        objectId,
+                        variety,
+                        class: dmaClass,
+                        dma
+                    };
+                    donutsDma.push(newItem);
+                }
+                
+                localStorage.setItem('dunkinDonutsDma', JSON.stringify(donutsDma));
+                resetDonutsDmaForm();
+                document.getElementById('donutsDmaForm').style.display = 'none';
+                loadDonutsDma();
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+        
+        function editDonutsDma(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const item = donutsDma.find(item => item.id === id);
+            if (item) {
+                document.getElementById('donutsObjectId').value = item.objectId || '';
+                document.getElementById('donutsVariety').value = item.variety || '';
+                document.getElementById('donutsClass').value = item.class || '';
+                document.getElementById('donutsDma').value = item.dma || '';
+                document.getElementById('editDonutsDmaId').value = item.id;
+                document.getElementById('donutsDmaFormTitle').textContent = 'Edit Donut DMA';
+                document.getElementById('donutsDmaForm').style.display = 'block';
+                document.getElementById('donutsDmaForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function deleteDonutsDma(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            if (confirm('Delete this Donut DMA permanently?')) {
+                donutsDma = donutsDma.filter(item => item.id !== id);
+                localStorage.setItem('dunkinDonutsDma', JSON.stringify(donutsDma));
+                loadDonutsDma();
+            }
+        }
+        
+        function cancelDonutsDma() {
+            resetDonutsDmaForm();
+            document.getElementById('donutsDmaForm').style.display = 'none';
+        }
+        
+        /* Munchkins DMA Functions */
+        function loadMunchkinsDma() {
+            const tableBody = document.getElementById('munchkinsDmaTableBody');
+            tableBody.innerHTML = '';
+            
+            if (munchkinsDma.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4">No Munchkins DMA data available</td></tr>';
+                return;
+            }
+            
+            munchkinsDma.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Create action buttons
+                let actionButtons = '';
+                if (isAuthenticated) {
+                    actionButtons = `
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editMunchkinsDma('${item.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteMunchkinsDma('${item.id}')">Delete</button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = '<span style="color:#999">[authenticate to edit]</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${item.objectId || '-'}</td>
+                    <td>${item.variety || '-'}</td>
+                    <td>${item.dma || '-'}</td>
+                    <td>${actionButtons}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function showMunchkinsDmaForm() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            resetMunchkinsDmaForm();
+            document.getElementById('munchkinsDmaForm').style.display = 'block';
+            document.getElementById('munchkinsDmaForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function resetMunchkinsDmaForm() {
+            document.getElementById('munchkinsObjectId').value = '';
+            document.getElementById('munchkinsVariety').value = '';
+            document.getElementById('munchkinsDma').value = '';
+            document.getElementById('editMunchkinsDmaId').value = '';
+            document.getElementById('munchkinsDmaFormTitle').textContent = 'Add New Munchkin DMA';
+        }
+        
+        function saveMunchkinsDma() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const objectId = document.getElementById('munchkinsObjectId').value;
+            const variety = document.getElementById('munchkinsVariety').value;
+            const dma = document.getElementById('munchkinsDma').value;
+            const editId = document.getElementById('editMunchkinsDmaId').value;
+            
+            if (objectId && variety && dma) {
+                if (editId) {
+                    // Update existing item
+                    const index = munchkinsDma.findIndex(item => item.id === editId);
+                    if (index !== -1) {
+                        munchkinsDma[index] = {
+                            id: editId,
+                            objectId,
+                            variety,
+                            dma
+                        };
+                    }
+                } else {
+                    // Add new item
+                    const newItem = {
+                        id: Date.now().toString(),
+                        objectId,
+                        variety,
+                        dma
+                    };
+                    munchkinsDma.push(newItem);
+                }
+                
+                localStorage.setItem('dunkinMunchkinsDma', JSON.stringify(munchkinsDma));
+                resetMunchkinsDmaForm();
+                document.getElementById('munchkinsDmaForm').style.display = 'none';
+                loadMunchkinsDma();
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+        
+        function editMunchkinsDma(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const item = munchkinsDma.find(item => item.id === id);
+            if (item) {
+                document.getElementById('munchkinsObjectId').value = item.objectId || '';
+                document.getElementById('munchkinsVariety').value = item.variety || '';
+                document.getElementById('munchkinsDma').value = item.dma || '';
+                document.getElementById('editMunchkinsDmaId').value = item.id;
+                document.getElementById('munchkinsDmaFormTitle').textContent = 'Edit Munchkin DMA';
+                document.getElementById('munchkinsDmaForm').style.display = 'block';
+                document.getElementById('munchkinsDmaForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function deleteMunchkinsDma(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            if (confirm('Delete this Munchkin DMA permanently?')) {
+                munchkinsDma = munchkinsDma.filter(item => item.id !== id);
+                localStorage.setItem('dunkinMunchkinsDma', JSON.stringify(munchkinsDma));
+                loadMunchkinsDma();
+            }
+        }
+        
+        function cancelMunchkinsDma() {
+            resetMunchkinsDmaForm();
+            document.getElementById('munchkinsDmaForm').style.display = 'none';
+        }
+        
+        /* KB Articles Functions */
+        function loadKbArticles() {
+            const tableBody = document.getElementById('kbArticlesTableBody');
+            tableBody.innerHTML = '';
+            
+            if (kbArticles.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="2">No KB Articles available</td></tr>';
+                return;
+            }
+            
+            kbArticles.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Create action buttons
+                let actionButtons = '';
+                if (isAuthenticated) {
+                    actionButtons = `
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editKbArticle('${item.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteKbArticle('${item.id}')">Delete</button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = '<span style="color:#999">[authenticate to edit]</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${item.article || '-'}</td>
+                    <td>${actionButtons}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function showKbArticleForm() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            resetKbArticleForm();
+            document.getElementById('kbArticlesForm').style.display = 'block';
+            document.getElementById('kbArticlesForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function resetKbArticleForm() {
+            document.getElementById('kbArticle').value = '';
+            document.getElementById('editKbArticleId').value = '';
+            document.getElementById('kbArticlesFormTitle').textContent = 'Add New KB Article';
+        }
+        
+        function saveKbArticle() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const article = document.getElementById('kbArticle').value;
+            const editId = document.getElementById('editKbArticleId').value;
+            
+            if (article) {
+                if (editId) {
+                    // Update existing item
+                    const index = kbArticles.findIndex(item => item.id === editId);
+                    if (index !== -1) {
+                        kbArticles[index] = {
+                            id: editId,
+                            article
+                        };
+                    }
+                } else {
+                    // Add new item
+                    const newItem = {
+                        id: Date.now().toString(),
+                        article
+                    };
+                    kbArticles.push(newItem);
+                }
+                
+                localStorage.setItem('dunkinKbArticles', JSON.stringify(kbArticles));
+                resetKbArticleForm();
+                document.getElementById('kbArticlesForm').style.display = 'none';
+                loadKbArticles();
+            } else {
+                alert('Please enter an article');
+            }
+        }
+        
+        function editKbArticle(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const item = kbArticles.find(item => item.id === id);
+            if (item) {
+                document.getElementById('kbArticle').value = item.article || '';
+                document.getElementById('editKbArticleId').value = item.id;
+                document.getElementById('kbArticlesFormTitle').textContent = 'Edit KB Article';
+                document.getElementById('kbArticlesForm').style.display = 'block';
+                document.getElementById('kbArticlesForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function deleteKbArticle(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            if (confirm('Delete this KB Article permanently?')) {
+                kbArticles = kbArticles.filter(item => item.id !== id);
+                localStorage.setItem('dunkinKbArticles', JSON.stringify(kbArticles));
+                loadKbArticles();
+            }
+        }
+        
+        function cancelKbArticle() {
+            resetKbArticleForm();
+            document.getElementById('kbArticlesForm').style.display = 'none';
+        }
+        
+        /* Change Logs Functions */
+        function loadChangeLogs() {
+            const tableBody = document.getElementById('changeLogsTableBody');
+            tableBody.innerHTML = '';
+            
+            if (changeLogs.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4">No Change Logs available</td></tr>';
+                return;
+            }
+            
+            changeLogs.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Create action buttons
+                let actionButtons = '';
+                if (isAuthenticated) {
+                    actionButtons = `
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editChangeLog('${item.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteChangeLog('${item.id}')">Delete</button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = '<span style="color:#999">[authenticate to edit]</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${item.date || '-'}</td>
+                    <td>${item.name || '-'}</td>
+                    <td>${item.remarks ? item.remarks.replace(/\n/g, '<br>') : '-'}</td>
+                    <td>${actionButtons}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function showChangeLogForm() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            resetChangeLogForm();
+            document.getElementById('changeLogsForm').style.display = 'block';
+            document.getElementById('changeLogsForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function resetChangeLogForm() {
+            document.getElementById('changeLogDate').value = '';
+            document.getElementById('changeLogName').value = '';
+            document.getElementById('changeLogRemarks').value = '';
+            document.getElementById('editChangeLogId').value = '';
+            document.getElementById('changeLogsFormTitle').textContent = 'Add New Change Log';
+        }
+        
+        function saveChangeLog() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const date = document.getElementById('changeLogDate').value;
+            const name = document.getElementById('changeLogName').value;
+            const remarks = document.getElementById('changeLogRemarks').value;
+            const editId = document.getElementById('editChangeLogId').value;
+            
+            if (date && name && remarks) {
+                if (editId) {
+                    // Update existing item
+                    const index = changeLogs.findIndex(item => item.id === editId);
+                    if (index !== -1) {
+                        changeLogs[index] = {
+                            id: editId,
+                            date,
+                            name,
+                            remarks
+                        };
+                    }
+                } else {
+                    // Add new item
+                    const newItem = {
+                        id: Date.now().toString(),
+                        date,
+                        name,
+                        remarks
+                    };
+                    changeLogs.push(newItem);
+                }
+                
+                localStorage.setItem('dunkinChangeLogs', JSON.stringify(changeLogs));
+                resetChangeLogForm();
+                document.getElementById('changeLogsForm').style.display = 'none';
+                loadChangeLogs();
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+        
+        function editChangeLog(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const item = changeLogs.find(item => item.id === id);
+            if (item) {
+                document.getElementById('changeLogDate').value = item.date || '';
+                document.getElementById('changeLogName').value = item.name || '';
+                document.getElementById('changeLogRemarks').value = item.remarks || '';
+                document.getElementById('editChangeLogId').value = item.id;
+                document.getElementById('changeLogsFormTitle').textContent = 'Edit Change Log';
+                document.getElementById('changeLogsForm').style.display = 'block';
+                document.getElementById('changeLogsForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function deleteChangeLog(id) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            if (confirm('Delete this Change Log permanently?')) {
+                changeLogs = changeLogs.filter(item => item.id !== id);
+                localStorage.setItem('dunkinChangeLogs', JSON.stringify(changeLogs));
+                loadChangeLogs();
+            }
+        }
+        
+        function cancelChangeLog() {
+            resetChangeLogForm();
+            document.getElementById('changeLogsForm').style.display = 'none';
+        }
+        
+        /* FAQ Functions */
+        function loadFaqs() {
+            const faqContainer = document.getElementById('faqContainer');
+            faqContainer.innerHTML = '';
+            
+            if (faqs.length === 0) {
+                faqContainer.innerHTML = '<p>No FAQs available yet.</p>';
+                return;
+            }
+            
+            faqs.forEach((faq, index) => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item';
+                faqItem.innerHTML = `
+                    <div class="faq-question" onclick="toggleFaqAnswer(${index})">
+                        ${faq.question}
+                        ${isAuthenticated ? `<button class="delete-btn" style="padding: 2px 5px; font-size: 0.7em;" onclick="deleteFaq(${index}, event)">Delete</button>` : ''}
+                    </div>
+                    <div class="faq-answer" id="faqAnswer${index}">
+                        ${faq.answer.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+                faqContainer.appendChild(faqItem);
+            });
+        }
+        
+        function toggleFaqAnswer(index) {
+            const answer = document.getElementById(`faqAnswer${index}`);
+            const question = answer.previousElementSibling;
+            
+            answer.classList.toggle('show');
+            question.classList.toggle('active');
+        }
+        
+        function showFaqForm() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            document.getElementById('faqForm').style.display = 'block';
+            document.getElementById('faqAuthMessage').style.display = 'none';
+            document.getElementById('faqQuestion').value = '';
+            document.getElementById('faqAnswer').value = '';
+            document.getElementById('addFaqBtn').style.display = 'none';
+            document.getElementById('faqForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function addFaq() {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            const question = document.getElementById('faqQuestion').value.trim();
+            const answer = document.getElementById('faqAnswer').value.trim();
+            
+            if (question && answer) {
+                faqs.push({
+                    question,
+                    answer
+                });
+                
+                localStorage.setItem('dunkinFaqs', JSON.stringify(faqs));
+                document.getElementById('faqForm').style.display = 'none';
+                document.getElementById('addFaqBtn').style.display = 'inline-block';
+                loadFaqs();
+                
+                // Show success message
+                const confirmation = document.createElement('div');
+                confirmation.textContent = 'FAQ added successfully!';
+                confirmation.style.color = 'green';
+                confirmation.style.marginTop = '10px';
+                document.getElementById('faqContainer').prepend(confirmation);
+                setTimeout(() => confirmation.remove(), 2000);
+            } else {
+                alert('Please enter both a question and answer');
+            }
+        }
+        
+        function cancelFaq() {
+            document.getElementById('faqForm').style.display = 'none';
+            if (isAuthenticated) {
+                document.getElementById('addFaqBtn').style.display = 'inline-block';
+                document.getElementById('faqAuthMessage').style.display = 'none';
+            } else {
+                document.getElementById('faqAuthMessage').style.display = 'block';
+            }
+        }
+        
+        function deleteFaq(index, event) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first!");
+                return;
+            }
+            
+            // Stop event propagation to prevent toggling the FAQ answer
+            event.stopPropagation();
+            
+            if (confirm('Delete this FAQ permanently?')) {
+                faqs.splice(index, 1);
+                localStorage.setItem('dunkinFaqs', JSON.stringify(faqs));
+                loadFaqs();
+            }
+        }
+    </script>
+</body>
+</html>
